@@ -4,7 +4,7 @@
 
 Seorang siswa mendapat nilai ujian.
 
-- Jika nilainya **≥ 90** cetak `"Nilai A"`
+- Jika nilainya **≥ 90** cetak `"Nilai A"`  
 - Jika nilainya **≥ 75** cetak `"Nilai B"`
 - Jika nilainya **≥ 60** cetak `"Nilai C"`
 - Jika nilainya di bawah 60 cetak `"Tidak lulus"`
