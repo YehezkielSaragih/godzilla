@@ -263,5 +263,4 @@ fun main() {
     println("Reserved: $reservedSeats")
     println("Available: ${availableSeats - reservedSeats}")
 }
-
 ```
