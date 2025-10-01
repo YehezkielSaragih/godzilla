@@ -3,60 +3,60 @@
 ```
 1. SharedPreferences cocok digunakan untuk…
    a) Menyimpan foto profil pengguna
-   b) Menyimpan token login dan setting ringan
+   **b) Menyimpan token login dan setting ringan**
    c) Menyimpan database transaksi
    d) Menyimpan file audio
 
 2. Default mode paling aman untuk membuat SharedPreferences adalah:
    a) MODE_MULTI_PROCESS
    b) MODE_APPEND
-   c) MODE_PRIVATE
+   **c) MODE_PRIVATE**
    d) MODE_WORLD_READABLE
 
 3. Perbedaan `apply()` dan `commit()` di SharedPreferences.Editor:
    a) `apply()` sinkron, `commit()` async
-   b) `apply()` async, `commit()` sinkron
+   **b) `apply()` async, `commit()` sinkron**
    c) Keduanya async
    d) Keduanya sinkron
 
 4. SharedPreferences disimpan secara fisik di…
    a) RAM
-   b) Internal storage sandbox aplikasi
+   **b) Internal storage sandbox aplikasi**
    c) External storage
    d) Firebase Realtime Database
 
 5. Komponen wajib Room:
    a) @Model, @Repository, @Database
-   b) @Entity, @Dao, @Database
+   **b) @Entity, @Dao, @Database**
    c) @Entity, @ViewModel, @Database
    d) @Table, @SQLite, @Repository
 
 6. Primary key auto-generate di Room ditulis:
    a) `@PrimaryKey val id: Int`
-   b) `@PrimaryKey(autoGenerate = true) val id: Int = 0`
+   **b) `@PrimaryKey(autoGenerate = true) val id: Int = 0`**
    c) `@Id(auto = true) val id: Int`
    d) `@Primary(auto = true) val id: Int`
 
 7. Jika kita mengubah struktur tabel Room tanpa migrasi:
    a) Database auto-update aman
-   b) Crash dengan `IllegalStateException`
+   **b) Crash dengan `IllegalStateException`**
    c) Hanya warning di log
    d) Room pindah otomatis ke SharedPreferences
 
 8. Untuk operasi database berat di Room agar tidak ANR, sebaiknya:
    a) Jalankan langsung di Main Thread
    b) Gunakan `allowMainThreadQueries()`
-   c) Gunakan coroutine Dispatchers.IO atau RxJava
+   **c) Gunakan coroutine Dispatchers.IO atau RxJava**
    d) Pakai Thread.sleep
 
 9. `@Insert(onConflict = REPLACE)` di Room artinya:
    a) Menolak insert jika sudah ada row
    b) Menghapus semua data lama
-   c) Menimpa data lama dengan primary key sama
+   **c) Menimpa data lama dengan primary key sama**
    d) Tidak ada efek
 
 10. Untuk mendapatkan data real-time dari Room:
-    a) Return `LiveData` atau `Flow` di DAO
+    **a) Return `LiveData` atau `Flow` di DAO**
     b) Return `Int` di DAO
     c) Return `String` di DAO
     d) Tidak bisa real-time
@@ -69,11 +69,35 @@
 ## Bagian B — Isian Singkat (3 Soal)
 
 11. Tulis kode satu baris untuk mendapatkan SharedPreferences bernama `"prefs"` di `Context`.
+```kotlin
+val prefs = context.getSharedPreferences("PREF", Context.MODE_PRIVATE)
+```
 
 12. Sebutkan 2 perbedaan `apply()` dan `commit()` di SharedPreferences.
+- apply() menyimpan data secara asinkron dan mengembalikan nilai, lebih cepat.
+- commit() menyimpan data secara sinkron dan mengembalikan Boolean untuk cek berhasil atau gagal.
 
 13. Bagaimana membuat singleton instance RoomDatabase bernama `AppDb` (builder standar, tanpa DI)?
+```kotlin
+@Database(entities = [Test::class], version = 1)
+abstract class AppDb : RoomDatabase() {
+    abstract fun testDao(): TestDao
 
+    companion object {
+        @Volatile private var INSTANCE: AppDb? = null
+
+        fun getInstance(context: Context): AppDb =
+            INSTANCE ?: synchronized(this) {
+                Room.databaseBuilder(
+                    context.applicationContext,
+                    AppDb::class.java,
+                    "app.db"
+                ).build().also { INSTANCE = it }
+            }
+    }
+}
+
+```
 ---
 
 ## Bagian C — Perbaikan Kode (7 Soal)
@@ -82,9 +106,7 @@
 
 ```kotlin
 val prefs = getSharedPreferences("user", MODE_PRIVATE)
-prefs.edit()
-putString("username", name)
-apply()
+prefs.edit().putString("username", name).apply()
 ```
 
 15. Apa output berikut jika key `"counter"` belum pernah dibuat?
@@ -96,8 +118,26 @@ p.edit().putInt("counter", counter + 1).commit()
 val after = p.getInt("counter", 0)
 println(after)
 ```
+Output = 5 + 1 = 6
 
 16. Tambahkan kode listener agar mendeteksi perubahan key `"theme"` di SharedPreferences dan unregister di `onDestroy()`.
+```kotlin
+private val listener = SharedPreferences.OnSharedPreferenceChangeListener { prefs, key ->
+    if (key == "theme") {
+        println("Theme changed to: ${prefs.getString("theme", "default")}")
+    }
+}
+
+override fun onStart() {
+    super.onStart()
+    getSharedPreferences("prefs", MODE_PRIVATE).registerOnSharedPreferenceChangeListener(listener)
+}
+
+override fun onDestroy() {
+    super.onDestroy()
+    getSharedPreferences("prefs", MODE_PRIVATE).unregisterOnSharedPreferenceChangeListener(listener)
+}
+```
 
 17. Perbaiki entity Room berikut:
 
@@ -105,7 +145,7 @@ println(after)
 @Entity(tableName = "notes")
 data class Note(
   @PrimaryKey(autoGenerate = true)
-  val id: Int?,
+  val id: Int=0,
   val title: String,
   @ColumnInfo(defaultValue = "''")
   val content: String
@@ -118,22 +158,23 @@ data class Note(
 @Dao
 interface NoteDao {
   @Insert
-  suspend fun insertAll(notes: List<Note>): Int
+  suspend fun insertAll(notes: List<Note>): List<Long>
 }
 ```
 
 19. Lengkapi kode untuk membuat database dan mengambil semua `Note` di background:
 
 ```kotlin
-val db = AppDb.getInstance(context)
-// ???
-println(all.size)
+CoroutineScope(Dispatchers.IO).launch {
+    val all = db.noteDao().getAll()
+    println(all.size)
+}
 ```
 
 20. Perbaiki query DAO berikut agar mengambil semua user terurut ASC:
 
 ```kotlin
-@Query("GET * FROM users ORDER name ASC")
+@Query("SELECT * FROM users ORDER BY name ASC")
 fun getAll(): List<User>
 ```
 
