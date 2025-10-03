@@ -5,7 +5,7 @@
 **1. Fragment biasanya digunakan untuk:**
 ```
 a) Menggantikan seluruh Activity
-b) Menampilkan bagian UI dalam sebuah Activity
+**b) Menampilkan bagian UI dalam sebuah Activity**
 c) Menghapus Activity dari memori
 d) Menjalankan background service
 ```
@@ -14,7 +14,7 @@ d) Menjalankan background service
 ```
 a) `onResume()`
 b) `onCreateView()`
-c) `onAttach()`
+**c) `onAttach()`**
 d) `onStart()`
 ```
 
@@ -22,14 +22,14 @@ d) `onStart()`
 ```
 a) Menambahkan fragment baru di atas fragment lama
 b) Menghapus semua fragment yang ada
-c) Mengganti fragment lama dengan fragment baru
+**c) Mengganti fragment lama dengan fragment baru**
 d) Membuat fragment berjalan di background
 ```
 
 **4. Untuk menambahkan fragment ke Activity melalui XML, digunakan:**
 ```
 a) `<include>`
-b) `<fragment>`
+**b) `<fragment>`**
 c) `<LinearLayout>`
 d) `<FrameLayout>`
 ```
@@ -37,7 +37,7 @@ d) `<FrameLayout>`
 **5. Menggunakan `addToBackStack()` pada FragmentTransaction berarti:**
 ```
 a) Fragment tidak bisa kembali
-b) Fragment disimpan agar bisa diakses dengan tombol back
+**b) Fragment disimpan agar bisa diakses dengan tombol back**
 c) Fragment langsung dihentikan
 d) Fragment hanya jalan sekali
 ```
@@ -47,14 +47,32 @@ d) Fragment hanya jalan sekali
 ## B. Isian Singkat (5 Soal)
 
 **6.** Sebutkan dua keuntungan menggunakan Fragment dibandingkan hanya Activity.
+- Bisa digunakan ulang di beberapa Activity
+- Dapat mempermudah layout adaptif
 
 **7.** Bagaimana cara menambahkan fragment secara dinamis dalam Activity menggunakan Kotlin?
+```kotlin
+supportFragmentManager.beginTransaction()
+    .add(R.id.fragment_container, HomeFragment.newInstance())
+    .commit()
+```
 
 **8.** Lifecycle Fragment mirip dengan Activity. Sebutkan minimal 3 perbedaan pentingnya.
+- Fragment memiliki onAttach() dan onDetach()
+- onCreateView() digunakan untuk membuat UI Fragment
+- Fragment lifecycle tergantung pada Activity host
 
 **9.** Apa perbedaan `add()` dan `replace()` pada FragmentTransaction?
+- add(): menambah fragment di atas fragment yang sudah ada
+- replace(): mengganti fragment lama dengan fragment baru
 
 **10.** Bagaimana cara mengirim data dari Activity ke Fragment?
+```kotlin
+val fragment = DetailFragment()
+fragment.arguments = Bundle().apply {
+    putString("key", "value")
+}
+```
 
 ---
 
@@ -64,7 +82,7 @@ d) Fragment hanya jalan sekali
 
 ```kotlin
 supportFragmentManager.beginTransaction()
-    .add(R.id.container, ExampleFragment)
+    .add(R.id.container, ExampleFragment.newInstance())
     .commit()
 ```
 
@@ -78,7 +96,7 @@ override fun onCreateView(
     container: ViewGroup?,
     savedInstanceState: Bundle?
 ): View {
-    return inflater.inflate(R.layout.fragment_example, null)
+    return inflater.inflate(R.layout.fragment_example, container, false)
 }
 ```
 
@@ -87,7 +105,7 @@ override fun onCreateView(
 **13. Fragment ingin mengirim data ke Activity, tapi ada kesalahan. Perbaiki:**
 
 ```kotlin
-(activity as MainActivity).showMessage = "Hello"
+(activity as? MainActivity)?.showMessage("Hello")
 ```
 
 ---
@@ -98,6 +116,7 @@ override fun onCreateView(
 val fragment = ExampleFragment()
 supportFragmentManager.beginTransaction()
     .replace(R.id.container, fragment)
+    .commit()
 ```
 
 ---
@@ -107,7 +126,7 @@ supportFragmentManager.beginTransaction()
 ```xml
 <fragment
     android:id="@+id/myFragment"
-    android:name="com.example.MyActivity"
+    android:name="com.example.MyFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"/>
 ```
@@ -118,7 +137,7 @@ supportFragmentManager.beginTransaction()
 
 ```kotlin
 val fragment = ProfileFragment()
-fragment.arguments.putString("username", "khalid")
+fragment.arguments = Bundle().apply { putString("username", "khalid") }
 ```
 
 ---
@@ -126,8 +145,9 @@ fragment.arguments.putString("username", "khalid")
 **17. Perbaiki agar fragment bisa dipanggil dari Activity menggunakan `supportFragmentManager`:**
 
 ```kotlin
-val manager = supportFragment
-manager.beginTransaction().add(R.id.container, MyFragment()).commit()
+supportFragmentManager.beginTransaction()
+    .add(R.id.container, MyFragment())
+    .commit()
 ```
 
 ---
@@ -135,8 +155,9 @@ manager.beginTransaction().add(R.id.container, MyFragment()).commit()
 **18. Ada error pada penggunaan `childFragmentManager`. Perbaiki:**
 
 ```kotlin
+val fragment = AnotherFragment()
 childFragmentManager.beginTransaction()
-    .add(R.id.container, AnotherFragment)
+    .add(R.id.container, fragment)
     .commit()
 ```
 
@@ -146,7 +167,9 @@ childFragmentManager.beginTransaction()
 
 ```kotlin
 val fragment = SecondFragment()
-fragment.setTargetFragment(FirstFragment(), 1)
+val bundle = Bundle()
+bundle.putString("key", "value")
+fragment.arguments = bundle
 ```
 
 ---
@@ -154,7 +177,7 @@ fragment.setTargetFragment(FirstFragment(), 1)
 **20. Perbaiki kode berikut agar fragment bisa dipanggil dengan `newInstance`:**
 
 ```kotlin
-val fragment = DetailFragment("id123")
+val fragment = DetailFragment.newInstance("id123")
 supportFragmentManager.beginTransaction()
     .replace(R.id.container, fragment)
     .commit()

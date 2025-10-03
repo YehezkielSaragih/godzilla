@@ -1,4 +1,5 @@
 package com.example.fragment.data
 
-class AppConfig {
+object AppConfig {
+    var onlyFavorite: Boolean = false
 }
